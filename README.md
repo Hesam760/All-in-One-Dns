@@ -18,7 +18,7 @@ The All-in-One DNS program is a tool that simplifies DNS configuration by allowi
 ### Adding Custom DNS IP
 
 1. Open the All-in-One DNS program.
-2. Click on "Add Service".
+2. Click on "Add New Service".
 3. Enter the custom DNS IP address.
 4. Save the settings.
 
