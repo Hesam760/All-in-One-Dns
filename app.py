@@ -71,24 +71,35 @@ def disconnect_dns():
         raise error
         
 def add_dns(new_service):
-    dns_dict = new_service.values()
-    for dns in dns_dict:
-        dns_list = dns.split(" ")
+    dns_servers = new_service.values()
+    dns_list = [dns.split(" ") for dns in dns_servers]
+
+    if not all(match_dns(dns) for dns in dns_list):
+        return "DNS servers not acceptable!"
+
+    if dns_list[0][0] == dns_list[0][1]:
+        return "Can't use same dns servers!"
+    
+    service_name = list(new_service.keys())[0]
+    dns_servers = get_servers()
+    if service_name in dns_servers:
+        return "Can't use the same service name!"
+
+    if len(dns_servers) >= 8:
+        return "Can't add more than 8 servers!"
+    
+    dns_servers.update(new_service)
+    with open(get_json_path(), "w") as file:
+        json.dump(dns_servers, file, indent=4)
         
-    if match_dns(dns_list):
-        dns_servers = get_servers()
-        dns_servers.update(new_service)
-        with open(get_json_path(), "w") as file:
-            json.dump(dns_servers, file, indent=4)
-        return True
-    else:
-        return "Dns servers not acceptable"
+    return True
 
 def match_dns(dns_list):
-    ipv4_pattern = r'\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b'
+    ipv4_pattern = r'^\d{1,3}(\.\d{1,3}){0,3}$'
         
     for dns in dns_list:
         match = re.match(ipv4_pattern, dns)
+        print(match)
         if not bool(match):
             return False
         
@@ -104,3 +115,14 @@ def get_json_path():
         json_path = os.path.join(script_directory, 'config', 'service.json')
     
     return json_path
+
+def delete_dns(service_name):
+    dns_servers = get_servers()
+    
+    check = dns_servers.pop(service_name, None)
+    if check :
+        with open(get_json_path(), "w") as file:
+            json.dump(dns_servers, file, indent=4)
+        return True
+    else :
+        return False
