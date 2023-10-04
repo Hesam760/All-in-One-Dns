@@ -1,4 +1,4 @@
-# All-in-One DNS
+# All-in-One-DNS
 
 The All-in-One DNS program is a tool that simplifies DNS configuration by allowing users to set DNS with one click and add custom DNS IP addresses for usage.
 
