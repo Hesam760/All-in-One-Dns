@@ -1,4 +1,4 @@
-# All-in-One DNS
+# All-in-One-DNS
 
 The All-in-One DNS program is a tool that simplifies DNS configuration by allowing users to set DNS with one click and add custom DNS IP addresses for usage.
 
@@ -26,7 +26,7 @@ The All-in-One DNS program is a tool that simplifies DNS configuration by allowi
 
 To install the All-in-One DNS program, you can download the latest release from the [Releases](https://github.com/Hesam760/all-in-one-dns/releases) page.
 
-Once downloaded, extract the archive to your desired location and follow the usage instructions below.
+Just open the Setup.exe file and complete the installation. (I prefer to enable the create desktop shortcut in the installation steps)
 
 ## UI Showcase
 
