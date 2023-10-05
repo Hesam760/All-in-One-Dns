@@ -37,7 +37,7 @@ class DNS():
     def check_dns_status(self) -> bool:
         c = wmi.WMI()
         for interface in c.Win32_NetworkAdapterConfiguration(IPEnabled=True):
-            if interface.DNSServerSearchOrder[0] != '192.168.1.1':
+            if interface.DNSServerSearchOrder is not None and len(interface.DNSServerSearchOrder) > 0 and not interface.DNSServerSearchOrder[0].startswith("192.168"):
                 return True
         return False
         
