@@ -6,8 +6,8 @@ ctk.set_appearance_mode("dark")
 root = ctk.CTk()
 root.geometry("400x400")
 root.resizable(False,False)
-
-image_path = "config/bg.jpg" 
+root.iconbitmap("./config/icon.ico") 
+image_path = "./config/bg.jpg" 
 image = Image.open(image_path)
 
 background_image = ctk.CTkImage(light_image=image, dark_image=image, size=(400,400))
