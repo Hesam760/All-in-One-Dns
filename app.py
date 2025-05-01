@@ -14,13 +14,14 @@ class DNS():
     def get_interface_info(self) -> list:
         try:
             result = subprocess.run(['netsh', 'interface', 'show', 'interface'], capture_output=True, text=True)
-            
             lines = result.stdout.split('\n')
             interface_info = []
             for i in range(3, len(lines)):
                 parts = lines[i].strip().split()
                 if len(parts) == 4:
                         interface_info.append([parts[1], parts[3]])
+                elif len(parts) == 5:
+                    interface_info.append([parts[1], parts[3] + " " + parts[4]])
 
             return interface_info
         except Exception as error:
@@ -30,7 +31,7 @@ class DNS():
 
     def find_connected_interface(self, interface_info) -> any:
         for interface in interface_info:
-            if interface[1] == "Wi-Fi" or interface[1] == "Ethernet" and interface[0].lower() == 'connected':
+            if interface[1] == "Wi-Fi" or str(interface[1]).startswith("Ethernet") and interface[0].lower() == 'connected':
                 return interface[1]
         return None
 
@@ -40,13 +41,23 @@ class DNS():
             if interface.DNSServerSearchOrder is not None and len(interface.DNSServerSearchOrder) > 0 and not interface.DNSServerSearchOrder[0].startswith("192.168"):
                 return True
         return False
+
+    def run_hidden(self, cmd) -> None:
+        ps_cmd = [
+            "powershell", "-Command",
+            f'Start-Process cmd -ArgumentList \'/c {cmd}\' -Verb RunAs -WindowStyle Hidden'
+        ]
+        subprocess.run(ps_cmd, creationflags=subprocess.CREATE_NO_WINDOW)
         
     def set_dns(self, connected_interface, primary_dns, secondary_dns) -> None:
         try:
-            primary_cmd = f'netsh interface ipv4 add dnsservers "{connected_interface}" address={primary_dns} index=1'
-            secondary_cmd = f'netsh interface ipv4 add dnsservers "{connected_interface}" address={secondary_dns} index=2'
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd", f"/c {primary_cmd}", None, 1)
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd", f"/c {secondary_cmd}", None, 1)            
+            interface_quoted = f'"{connected_interface}"'
+            primary_cmd = f'netsh interface ipv4 set dnsservers name={interface_quoted} source=static address={primary_dns}'
+            secondary_cmd = f'netsh interface ipv4 add dnsservers name={interface_quoted} address={secondary_dns} index=2'
+            
+            self.run_hidden(primary_cmd)
+            self.run_hidden(secondary_cmd)      
+
         except Exception as error:
             raise error
 
@@ -77,8 +88,9 @@ class DNS():
         interface_info = self.get_interface_info()
         connected_interface = self.find_connected_interface(interface_info)
         try:
+            interface_quoted = f'"{connected_interface}"'
             reset_cmd = f'netsh interface ip set dns "{connected_interface}" dhcp'
-            ctypes.windll.shell32.ShellExecuteW(None, "runas", "cmd", f"/c {reset_cmd}", None, 1)
+            self.run_hidden(reset_cmd)
         except Exception as error:
             raise error
             
@@ -120,10 +132,10 @@ class DNS():
         
         if getattr(sys, 'frozen', False):
             executable_directory = os.path.dirname(sys.executable)
-            json_path = os.path.join(executable_directory, 'config', 'service.json')
+            json_path = os.path.join(executable_directory, 'config','service.json')
         else:
             script_directory = os.path.dirname(os.path.abspath(__file__))
-            json_path = os.path.join(script_directory, 'config', 'service.json')
+            json_path = os.path.join(script_directory, 'config','service.json')
         
         return json_path
 
